@@ -1,5 +1,5 @@
 {
-  "name": "solana-dao-token-vesting-swap",
+  "name": "frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
