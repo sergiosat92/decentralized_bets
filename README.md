@@ -1,1 +1,5 @@
-# Solana Dao Token Vesting Swap# decentralized_bets
+# Decentralized Betting Platform
+
+A decentralized betting platform that allows users to place bets on a range of sports events.
+
+## Under construction

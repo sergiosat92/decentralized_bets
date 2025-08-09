@@ -1,0 +1,63 @@
+<nav class="navbar">
+  <a href="/" class="navbar__title">⚡ CRYPTOBET</a>
+  <div class="navbar__wallet">
+    <img
+      [src]="activeWallet()?.icon"
+      [alt]="activeWallet()?.name"
+      class="wallet-icon"
+      *ngIf="activeWallet()"
+    />
+    <span class="wallet-pubkey" *ngIf="activeWallet()">{{
+      activeWallet()?.publicKey?.toBase58()?.slice(0, 10) + ".."
+    }}</span>
+    <button
+      class="wallet-button"
+      (click)="openWallets()"
+      *ngIf="!activeWallet()"
+    >
+      Connect Wallet
+    </button>
+    <button
+      class="wallet-button"
+      (click)="disconnectWallet()"
+      *ngIf="activeWallet()"
+    >
+      Disconnect
+    </button>
+  </div>
+</nav>
+
+<!-- Wallet Dialog -->
+<dialog [open]="openWallet()">
+  <div class="wallet-dialog">
+    <h2>Select your Wallet</h2>
+    <div class="wallet-list">
+      <div *ngFor="let wallet of wallets()">
+        <button class="wallet-option" (click)="connectWallet(wallet.name)">
+          <div class="wallet-info">
+            <img [src]="wallet.icon" [alt]="wallet.name" class="wallet-icon" />
+            <span class="wallet-name">{{ wallet.name }}</span>
+          </div>
+          <span
+            class="wallet-status"
+            [class.installed]="wallet.readyState === WalletReadyState.Installed"
+            [class.unavailable]="
+              !wallet.readyState ||
+              wallet.readyState === WalletReadyState.NotDetected ||
+              wallet.readyState === WalletReadyState.Unsupported
+            "
+          >
+            {{
+              wallet.readyState === WalletReadyState.Installed
+                ? "Connect"
+                : wallet.readyState === WalletReadyState.Loadable
+                ? "Install"
+                : "Unavailable"
+            }}
+          </span>
+        </button>
+      </div>
+    </div>
+    <button class="wallet-close" (click)="openWallets()">Close</button>
+  </div>
+</dialog>

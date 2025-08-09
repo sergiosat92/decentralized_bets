@@ -1,1 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
+/* -------------------------------------------------
+   🌑 DARK THEME — Crypto Sports Betting Platform
+-------------------------------------------------- */
+
+@font-face {
+  font-family: "Orbitron";
+  src: url("/fonts/Orbitron-VariableFont_wght.ttf") format("truetype");
+}
+
+:root {
+  /* 🎨 Color Palette */
+  --color-primary: #14c8ff;
+  --color-secondary: #1b9cfc;
+  --color-background: #0f1115;
+  --color-surface: #1a1d23;
+  --color-border: #2e323c;
+  --color-text-primary: #ffffff;
+  --color-text-muted: #a0a4af;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-highlight: #f472b6;
+  --color-crypto-gold: #facc15;
+
+  /* 🖋️ Typography */
+  --font-heading: "Orbitron", sans-serif;
+  --font-body: sans-serif;
+
+  /* 💡 Extras */
+  --neon-shadow: 0 0 12px var(--color-primary);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+}
