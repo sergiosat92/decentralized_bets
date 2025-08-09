@@ -1,5 +1,5 @@
-# Decentralized Betting Platform
+# Decentralized Betting Platform Prototype
 
-A decentralized betting platform that allows users to place bets on a range of sports events.
+A decentralized betting platform protoype that allows users to place bets on a range of sports events.
 
 ## Under construction

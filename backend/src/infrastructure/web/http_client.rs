@@ -6,10 +6,9 @@
 use reqwest::{Method, Client, header::HeaderMap, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use tracing::Level;
+use core::fmt;
 use std::time::Duration;
 
-use crate::infrastructure::observability::logs::logger;
 
 /// Sends an HTTP request asynchronously with optional headers and JSON body.
 /// Returns the deserialized response data if available.
@@ -28,25 +27,22 @@ use crate::infrastructure::observability::logs::logger;
 ///
 /// # Logging
 /// Errors and failures are logged at error level with detailed messages.
-pub async fn send_request<T>(
+pub async fn send_request<T, R>(
     url: &str,
     method: Method,
     headers: Option<&HeaderMap>,
     body: Option<&T>,
-    timeout_sec: u64,
-) -> Result<Option<T>, String>
+    timeout_sec: Option<u64>,
+) -> Result<Option<R>, String>
 where
-    T: DeserializeOwned + Serialize,
+    T: Serialize + fmt::Debug,
+    R: DeserializeOwned + fmt::Debug,
 {
     let client = Client::builder()
-        .timeout(Duration::from_secs(timeout_sec))
+        .timeout(Duration::from_secs(timeout_sec.unwrap_or(5)))
         .build()
         .map_err(|e| {
-            logger(
-                Level::ERROR,
-                "send_request",
-                &format!("❌ Error creating HTTP client: {}", e),
-            );
+            println!("❌ Error creating HTTP client: {}", e);
             format!("Error creating HTTP client: {}", e)
         })?;
 
@@ -65,11 +61,7 @@ where
     let response = match request_builder.send().await {
         Ok(resp) => resp,
         Err(e) => {
-            logger(
-                Level::ERROR,
-                "send_request",
-                &format!("❌ Error sending request: {}", e),
-            );
+            println!("❌ Error sending request: {}", e);
             return Err(format!("❌ Error sending request: {}", e));
         }
     };
@@ -77,21 +69,21 @@ where
     // Handle response status codes
     match response.status() {
         StatusCode::OK | StatusCode::CREATED | StatusCode::ACCEPTED => {
-            match response.json::<T>().await {
+            match response.json::<R>().await {
                 Ok(data) => Ok(Some(data)),
-                Err(_) => Ok(None),
+                Err(e) => {
+                    println!("❌ Error deserializing response: {}", e);
+                    Err(format!("❌ Error deserializing response: {}", e))
+                },
             }
         }
-        StatusCode::NO_CONTENT => Ok(None),
+        StatusCode::NO_CONTENT => {
+            println!("✅ Request succeeded with no content");
+            Ok(None)
+        },
         status => {
             let text = response.text().await.unwrap_or_default();
-
-            logger(
-                Level::ERROR,
-                "send_request",
-                &format!("❌ Request failed: {} - {}", status, text),
-            );
-
+            println!("❌ Request failed with status {}: {}", status, text);
             Err(format!(
                 "Request failed with status {}: {}",
                 status, text

@@ -1,4 +1,14 @@
 <app-navbar></app-navbar>
-<main>
-    
+
+<main class="leagues-container">
+  <div class="league-card" *ngFor="let league of leagues">
+    <img class="league-logo" [src]="league.image_path" [alt]="league.name" />
+    <div class="league-info">
+      <h3 class="league-name">{{ league.name }}</h3>
+      <p class="league-code">{{ league.code }}</p>
+      <p class="league-type">{{ league.type }}</p>
+    </div>
+  </div>
 </main>
+
+<app-logger></app-logger>

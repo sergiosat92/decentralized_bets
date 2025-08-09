@@ -4,7 +4,6 @@
 //! including authorization, HTTP client utilities, middleware, routing, and OAuth integration.
 
 pub mod authorization;
+pub mod cache;
 pub mod http_client;
-pub mod middlewares;
 pub mod routes;
-pub mod oauth;

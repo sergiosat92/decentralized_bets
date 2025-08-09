@@ -20,19 +20,19 @@ export class NavbarComponent {
     this.openWallet.set(!this.openWallet());
   }
 
-  connectWallet(name: string) {
+  async connectWallet(name: string) {
     const wallet = this.walletService.wallets().find((w) => w.name === name);
     if (!wallet) return;
 
     if (wallet.readyState === WalletReadyState.Installed) {
-      this.walletService.connectWallet(wallet);
+      await this.walletService.connectWallet(wallet);
       this.openWallet.set(false);
     } else {
       window.open(wallet.url, '_blank');
     }
   }
 
-  disconnectWallet() {
-    this.walletService.disconnect();
+  async disconnectWallet() {
+    await this.walletService.disconnect();
   }
 }

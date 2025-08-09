@@ -1,4 +1,4 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
@@ -34,11 +34,14 @@ import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-unsafe-burner'
 import { XDEFIWalletAdapter } from '@solana/wallet-adapter-xdefi';
 
 import { WalletAdapter, WalletReadyState } from '@solana/wallet-adapter-base';
+import { LoggerService } from './logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WalletService {
+  logsService = inject(LoggerService);
+
   readonly all_wallets: WalletAdapter[] = [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
@@ -91,27 +94,45 @@ export class WalletService {
 
     this.wallets.set(wallets);
 
-    effect(() => {
-      this.activeWallet()?.on('disconnect', () => {
-        this.activeWallet.set(null);
-        console.log(`${this.activeWallet()?.name} disconnected ❌`);
-      });
+    effect((onCleanup) => {
+      const wallet = this.activeWallet();
+      if (!wallet) return;
 
-      this.activeWallet()?.on('error', (error) => {
-        console.error(`${this.activeWallet()?.name} error:`, error);
+      const disconnectHandler = () => {
+        this.logsService.printLog('info', `${wallet.name} disconnected ❌`);
+        this.activeWallet.set(null);
+      };
+
+      const errorHandler = (error: any) => {
+        this.logsService.printLog('error', `${wallet.name} error: ${error}`);
+      };
+
+      wallet.on('disconnect', disconnectHandler);
+      wallet.on('error', errorHandler);
+
+      onCleanup(() => {
+        wallet.off('disconnect', disconnectHandler);
+        wallet.off('error', errorHandler);
       });
     });
   }
 
   async connectWallet(wallet: WalletAdapter) {
+    if (this.activeWallet() === wallet) return;
+
+    if (this.activeWallet()) {
+      await this.disconnect();
+    }
     await wallet
       .connect()
       .then(() => {
         this.activeWallet.set(wallet);
+        this.logsService.printLog('info', `${wallet.name} connected ✅`);
         console.log(`${wallet.name} connected ✅`);
       })
       .catch((e) => {
-        console.error(e);
+        this.logsService.printLog('error', `${wallet.name} error: ${e}`);
+        console.error(`${wallet.name} error:`, e);
       });
   }
 
